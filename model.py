@@ -1,11 +1,10 @@
 import random
 import global_vars
 from mesa import Model
-from mesa.time import SimultaneousActivation, RandomActivation
+from mesa.time import SimultaneousActivation
 from employer import Employer
 from worker import Worker
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def modify_random_values(attribute):
@@ -182,18 +181,18 @@ class MarketModel(Model):
             if isinstance(agents, Employer):
                 agents.set_minimum_wage(minimum_wages)
             else:
-                agents.wage_preferred_threshold = global_vars.minimum_wage
-                if agents.wage_preferred < global_vars.minimum_wage:
-                    agents.wage_preferred = global_vars.minimum_wage
+                if agents.get_works_under() == -1:
+                    if agents.wage_preferred < minimum_wages:
+                        agents.wage_preferred = minimum_wages
 
     def update_min_leisure(self, minimum_leisure):
         for agents in self.schedule.agents:
             if isinstance(agents, Employer):
                 agents.set_minimum_leisure(minimum_leisure)
-        for agents in self.schedule.agents:
-            agents.leisure_preferred_threshold = global_vars.minimum_leisure
-            if agents.leisure_preferred < global_vars.minimum_leisure:
-                agents.leisure_preferred = global_vars.minimum_leisure
+            else:
+                if agents.get_works_under() == -1:
+                    if agents.leisure_preferred < minimum_leisure:
+                        agents.leisure_preferred = minimum_leisure
 
     def update_wage_n_leisure(self, minimum_wage, minimum_leisure):
         for agents in self.schedule.agents:
@@ -211,19 +210,47 @@ class MarketModel(Model):
     def average_wages(self):
         """Obtaining average wages for helping the regulator"""
         wage = 0
+        count = 0
         for agents in self.schedule.agents:
             if isinstance(agents, Worker):
-                wage = wage + agents.get_wage_preferred()
-        wage = wage / 5000
+                if agents.get_works_under() == -1:
+                    wage = wage + agents.get_wage_preferred()
+                    count = count + 1
+        wage = wage / count
         return wage
 
     def average_leisure(self):
         """Obtaining average leisure for helping the regulator"""
         leisure = 0
+        count = 0
         for agents in self.schedule.agents:
             if isinstance(agents, Worker):
-                leisure = leisure + agents.get_leisure_preferred()
-        leisure = leisure / 5000
+                if agents.get_works_under() == -1:
+                    leisure = leisure + agents.get_leisure_preferred()
+                    count = count + 1
+        leisure = leisure / count
+        return leisure
+
+    def average_wages_2(self):
+        """Obtaining average wages for helping the regulator"""
+        wage = 0
+        count = 0
+        for agents in self.schedule.agents:
+            if isinstance(agents, Worker):
+                    wage = wage + agents.get_wage_preferred()
+                    count = count + 1
+        wage = wage / count
+        return wage
+
+    def average_leisure_2(self):
+        """Obtaining average leisure for helping the regulator"""
+        leisure = 0
+        count = 0
+        for agents in self.schedule.agents:
+            if isinstance(agents, Worker):
+                    leisure = leisure + agents.get_leisure_preferred()
+                    count = count + 1
+        leisure = leisure / count
         return leisure
 
     def quadrant_update(self):
@@ -261,7 +288,7 @@ class MarketModel(Model):
                 reg_wage = reg_wage + agents.get_wage_preferred_threshold()
 
         self.regulating_wage = reg_wage / global_vars.M
-        print(self.regulating_wage)
+        print("Regulating Wage: " + str(self.regulating_wage))
 
     def set_regulating_leisure(self):
         reg_leisure = 0
@@ -269,4 +296,4 @@ class MarketModel(Model):
             if isinstance(agents, Worker):
                 reg_leisure = reg_leisure + agents.get_leisure_preferred_threshold()
         self.regulating_leisure = reg_leisure / global_vars.M
-        print(self.regulating_leisure)
+        print("Regulating Leisure: " + str(self.regulating_leisure))

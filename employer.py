@@ -96,40 +96,39 @@ class Employer(Agent):
         if self.need == 0:
             return
         if self.increment_number == 1:
-            if self.type == 1:
-                x = self.leisure + random.randint(8, 15) * self.leisure * 0.01
-                if x >= 75:
-                    self.leisure = 75
+            if self.type == 2:
+                x = self.leisure + self.leisure * 0.1
+                if x >= 80:
+                    self.leisure = 80
                 else:
                     self.leisure = x
-                self.wage_offered = self.wage_offered + random.randint(0, 5) * self.wage_offered * 0.01
             else:
-                self.leisure = self.leisure + random.randint(0, 5) * self.leisure * 0.01
-                x = self.wage_offered + random.randint(8, 15) * self.wage_offered * 0.01
-                if x >= 75:
-                    self.wage_offered = 75
+
+                x = self.wage_offered + self.wage_offered * 0.1
+                if x >= 80:
+                    self.wage_offered = 80
                 else:
                     self.wage_offered = x
 
         else:
             if self.type == 1:
-                x = self.leisure + random.randint(8, 25) * self.leisure * 0.01
-                if x >= 75:
-                    self.leisure = 75
+                x = self.leisure + self.leisure * 0.1
+                if x >= 80:
+                    self.leisure = 80
                 else:
                     self.leisure = x
-                self.wage_offered = self.wage_offered + random.randint(0, 10) * self.wage_offered * 0.01
-                if self.wage_offered > 75:
-                    self.wage_offered = 75
+                self.wage_offered = self.wage_offered + self.wage_offered * 0.1
+                if self.wage_offered > 80:
+                    self.wage_offered = 80
             else:
-                self.leisure = self.leisure + random.randint(0, 10) * self.leisure * 0.01
-                x = self.wage_offered + random.randint(8, 25) * self.wage_offered * 0.01
-                if x >= 75:
-                    self.wage_offered = 75
+                self.leisure = self.leisure + self.leisure * 0.1
+                x = self.wage_offered + self.wage_offered * 0.1
+                if x >= 80:
+                    self.wage_offered = 80
                 else:
                     self.wage_offered = x
-                if self.leisure > 75:
-                    self.leisure = 75
+                if self.leisure >= 80:
+                    self.leisure = 80
 
     def get_need(self):
         return self.need

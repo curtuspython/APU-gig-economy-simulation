@@ -112,32 +112,39 @@ class Worker(Agent):
         agent.workers_potential.pop(index)
 
     def step(self):
-        emp = self.model.schedule.agents[0]
-        flag = -1
-        employers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        random.shuffle(employers)
-        for i in employers:
-            obj = self.model.schedule.agents[i]
-            u = self.wage_coef * obj.get_wage_offered() + self.lei_coef * obj.get_leisure()
-            if self.type == obj.get_type():
-                # hiring of worker j by Employer i
-                if self.utility < u and self.wage_preferred <= obj.get_wage_offered() and self.leisure_preferred <= obj.get_leisure() and obj.get_need() > 0:
-                    if self.revenue_potential * self.skill > obj.get_wage_offered() * (1 - obj.get_flexibility()):
-                        self.utility = u
-                        self.works_under = obj.get_emp_id()
-                        emp = obj
-                        flag = 1
-        if flag == 1:
-            emp.acquire_worker(self.unique_id, self.revenue_potential, self.wage_preferred)
-            self.unemployed_duration = 0
+        if self.works_under == -1:
+            emp = self.model.schedule.agents[0]
+
+            flag = -1
+            employers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            random.shuffle(employers)
+            for i in employers:
+                obj = self.model.schedule.agents[i]
+                u = self.wage_coef * obj.get_wage_offered() + self.lei_coef * obj.get_leisure()
+                if self.type == obj.get_type():
+                    # hiring of worker j by Employer i
+                    if self.utility < u and self.wage_preferred <= obj.get_wage_offered() and self.leisure_preferred <= obj.get_leisure() and obj.get_need() > 0:
+                        if self.revenue_potential * self.skill > obj.get_wage_offered() * (1 - obj.get_flexibility()):
+                            self.utility = u
+                            self.works_under = obj.get_emp_id()
+                            emp = obj
+                            flag = 1
+            if flag == 1:
+                emp.acquire_worker(self.unique_id, self.revenue_potential, self.wage_preferred)
+                self.unemployed_duration = 0
 
     def decrease_reservation_wage_leisure(self, choice):
+        self.update_unemployed_time()
+        if self.unemployed_duration >= 24 and choice == 11:
+            self.improve_skill()
+            self.unemployed_duration = self.unemployed_duration - 12
         if self.type == 1:
             if self.reduce_wage:
                 x = self.wage_preferred - 0.1 * self.wage_preferred
                 if x >= self.wage_preferred_threshold:
                     self.wage_preferred = x
                 else:
+                    self.flip_reduction()
                     x = self.leisure_preferred - 0.1 * self.leisure_preferred
                     if x >= self.leisure_preferred_threshold:
                         self.leisure_preferred = x
@@ -147,6 +154,7 @@ class Worker(Agent):
                 if x >= self.leisure_preferred_threshold:
                     self.leisure_preferred = x
             else:
+                self.flip_reduction()
                 x = self.wage_preferred - 0.1 * self.wage_preferred
                 if x >= self.wage_preferred_threshold:
                     self.wage_preferred = x
@@ -166,7 +174,7 @@ class Worker(Agent):
             self.operating_quadrant = 3
 
     def improve_skill(self):
-        x = self.skill + self.skill * 0.05
+        x = self.skill + self.skill * 0.1
         if x <= 1:
             self.skill = x
 
