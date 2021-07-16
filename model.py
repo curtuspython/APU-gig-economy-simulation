@@ -73,7 +73,7 @@ class MarketModel(Model):
         x = 60
         intercept = intercept - diff1
         for i in range(int(self.num_employers / 2)):
-            a = Employer(i, self, worker_count, x, 0.5, n, intercept, self.service_demand[i], self.employer_flex[i])
+            a = Employer(i, self, worker_count, x, 0.5, 1, intercept, self.service_demand[i], self.employer_flex[i])
             self.schedule.add(a)
             x = x + 10
         # 6-10 offline employers
@@ -194,19 +194,6 @@ class MarketModel(Model):
                     if agents.leisure_preferred < minimum_leisure:
                         agents.leisure_preferred = minimum_leisure
 
-    def update_wage_n_leisure(self, minimum_wage, minimum_leisure):
-        for agents in self.schedule.agents:
-            if isinstance(agents, Employer):
-                agents.set_min_wage_leisure(global_vars.minimum_wage, global_vars.minimum_leisure)
-            else:
-                agents.wage_preferred_threshold = global_vars.minimum_wage
-                agents.leisure_preferred_threshold = global_vars.minimum_leisure
-                if agents.wage_preferred < global_vars.minimum_wage:
-                    agents.wage_preferred = global_vars.minimum_wage
-
-                if agents.leisure_preferred < global_vars.minimum_leisure:
-                    agents.leisure_preferred = global_vars.minimum_leisure
-
     def average_wages(self):
         """Obtaining average wages for helping the regulator"""
         wage = 0
@@ -237,8 +224,8 @@ class MarketModel(Model):
         count = 0
         for agents in self.schedule.agents:
             if isinstance(agents, Worker):
-                    wage = wage + agents.get_wage_preferred()
-                    count = count + 1
+                wage = wage + agents.get_wage_preferred()
+                count = count + 1
         wage = wage / count
         return wage
 
@@ -248,8 +235,8 @@ class MarketModel(Model):
         count = 0
         for agents in self.schedule.agents:
             if isinstance(agents, Worker):
-                    leisure = leisure + agents.get_leisure_preferred()
-                    count = count + 1
+                leisure = leisure + agents.get_leisure_preferred()
+                count = count + 1
         leisure = leisure / count
         return leisure
 

@@ -1,9 +1,13 @@
 import matplotlib.pyplot as plt
-skill = [0.5074, 0.516 , 0.5269,0.5606, 0.5715,0.60,0.6226,0.66,0.6645,0.6794, ]
-iteration = [i for i in range(1, 11)]
-plt.plot(iteration, skill , 'b-', label = "Average Skill level of workers " )
+import numpy as np
+profit = np.array([
+483, 590, 628, 738, 738, 738, 738, 738, 738, 738, 738])
+array2 = np.array([10000,10000,10000,10000,10000,10000,10000,10000,10000,10000, 10000])
+x = np.add(profit, array2)
+iteration = [i for i in range(0, 11)]
+plt.plot(iteration, x , 'b-', label = "Average Profit of Firms " )
 
 plt.xlabel("Iteration count")
-plt.ylabel("Average Skill")
+plt.ylabel("Average Profit")
 plt.legend(loc = 0)
 plt.show()

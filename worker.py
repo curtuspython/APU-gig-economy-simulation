@@ -21,7 +21,7 @@ class Worker(Agent):
         if self.type == 1:
             self.wage_coef = np.random.binomial(50, self.prob, 1)[0] / 100
             self.lei_coef = np.random.binomial(total, self.prob, 1)[0] / 100 - self.wage_coef
-            self.reduce_wage = True
+            self.reduce_wage = False
         else:
             self.wage_coef = np.random.binomial(150, self.prob, 1)[0] / 100
             self.lei_coef = np.random.binomial(total, self.prob, 1)[0] / 100 - self.wage_coef
@@ -145,16 +145,18 @@ class Worker(Agent):
                     self.wage_preferred = x
                 else:
                     self.flip_reduction()
-                    x = self.leisure_preferred - 0.1 * self.leisure_preferred
-                    if x >= self.leisure_preferred_threshold:
-                        self.leisure_preferred = x
+            else:
+                x = self.leisure_preferred - 0.1 * self.leisure_preferred
+                if x >= self.leisure_preferred_threshold:
+                    self.leisure_preferred = x
         else:
             if not self.reduce_wage:
                 x = self.leisure_preferred - 0.1 * self.leisure_preferred
                 if x >= self.leisure_preferred_threshold:
                     self.leisure_preferred = x
+                else:
+                    self.flip_reduction()
             else:
-                self.flip_reduction()
                 x = self.wage_preferred - 0.1 * self.wage_preferred
                 if x >= self.wage_preferred_threshold:
                     self.wage_preferred = x

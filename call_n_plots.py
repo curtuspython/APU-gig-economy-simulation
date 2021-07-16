@@ -1,5 +1,8 @@
 import copy
+import math
 import random
+
+import model_outside
 from model import MarketModel
 import pandas as pd
 import global_vars
@@ -13,9 +16,8 @@ def model_with_demand_constraint(choice=1):
     unemployment = list()
     demand_model = MarketModel(global_vars.N, global_vars.M, 3, True)
     initial_demand = list()
-
-    df = pd.DataFrame(columns=['Employer 1', 'Employer 2', 'Employer 3', 'Employer 4', 'Employer 5',
-                               'Employer 6', 'Employer 7', 'Employer 8', 'Employer 9', 'Employer 10', 'Total'])
+    df = pd.DataFrame(columns=['Emp 1', 'Emp 2', 'Emp 3', 'Emp 4', 'Emp 5',
+                               'Emp 6', 'Emp 7', 'Emp 8', 'Emp 9', 'Emp 10', 'Total'])
     wage_leisure_track = pd.DataFrame(columns=['Employer 1', 'Employer 2', 'Employer 3', 'Employer 4', 'Employer 5',
                                                'Employer 6', 'Employer 7', 'Employer 8', 'Employer 9', 'Employer 10'])
     df2 = pd.DataFrame(columns=['Employer 1', 'Employer 2', 'Employer 3', 'Employer 4', 'Employer 5',
@@ -33,8 +35,13 @@ def model_with_demand_constraint(choice=1):
         for i in range(0, 10):
             wage.append(all_members[i].get_wage_offered())
             leisure.append(all_members[i].get_leisure())
+        wage.append(0)
+        leisure.append(0)
         print("Wages:" + str(wage))
         print("Leisure" + str(leisure))
+        df.loc[1] = wage
+        df.loc[2] = leisure
+        df.to_csv('Models/initial.csv', index=False)
         return demand_model
         wage_leisure_track.loc[0] = wage
         wage_leisure_track.loc[1] = leisure
@@ -124,15 +131,77 @@ def dumb_model(demand_model):
     return demand_model
 
 
-def self_regulating_worker(model, choice):
+def self_regulating_worker(model, choice, iterations):
     wage = list()
     leisure = list()
+    skill_list = list()
+    unemp_rates = list()
+    profit_list = list()
+
     agent_index = [i for i in range(10, 5010)]
     demand = print_demand(model)
     count = 0
-
     all_agents = model.schedule.agents
-    while demand[-1] > 0 and count < 15:
+    while demand[-1] > 0 and count < 10:
+        print("\n")
+        print("Iteration" + str(count))
+        print("--------------------------------")
+        print("--------------------------------")
+        avg_wage = model.average_wages()
+        avg_leisure = model.average_leisure()
+        wage.append(avg_wage)
+        leisure.append(avg_leisure)
+        if model.average_wages() < global_vars.regulatory_threshold_wage:
+            print("Minimum wage introduced at " + str(count))
+            model.update_min_wages(global_vars.regulatory_threshold_wage)
+            model_outside.leave_job(model)
+            model_outside.fire_from_job(model)
+        if model.average_leisure() < global_vars.regulatory_threshold_leisure:
+            print("Minimum leisure introduced at " + str(count))
+            model.update_min_leisure(global_vars.regulatory_threshold_leisure)
+            model_outside.leave_job(model)
+            model_outside.fire_from_job(model)
+        random.shuffle(agent_index)
+        skill = 0
+        for i in agent_index[0:5000]:
+            if choice == 1:
+                all_agents[i].decrease_reservation_wage_leisure(10)
+            else:
+                skill = all_agents[i].skill + skill
+                all_agents[i].decrease_reservation_wage_leisure(11)
+        skill_list.append(skill / 5000)
+        demand = print_demand(model)
+
+        model.step()
+
+        profit = list()
+        for pro in range(0, 10):
+            profit.append(all_agents[pro].calculate_profit())
+        profit_list.append(sum(profit) / 10)
+        count = count + 1
+
+        print("Consumer Surplus :" + str(model.consumer_surplus()))
+        model_features.analise(model)
+        unemp_rates.append(global_vars.unemployment_rate)
+    print(str(profit_list))
+    print(str(wage))
+    print(str(leisure))
+    print(str(unemp_rates))
+    print(str(skill_list))
+
+    if choice == 1:
+        with open('Models/demand_after15rounds10.pkl', 'wb') as output:
+            pickle.dump(model, output, pickle.HIGHEST_PROTOCOL)
+    if choice == 2:
+        with open('Models/demand_after15rounds11.pkl', 'wb') as output:
+            pickle.dump(model, output, pickle.HIGHEST_PROTOCOL)
+    # increase the demands
+    '''
+    for i in range(0, 10):
+        all_agents[i].demand = math.ceil(0.1 * all_agents[i].demand) + all_agents[i].demand
+        all_agents[i].need = math.ceil(0.1 * all_agents[i].demand) + all_agents[i].need
+
+    while demand[-1] > 0 and count < iterations:
         print("\n")
         print("Iteration" + str(count))
         print("--------------------------------")
@@ -147,16 +216,19 @@ def self_regulating_worker(model, choice):
         if model.average_leisure() < global_vars.regulatory_threshold_leisure:
             print("Minimum leisure introduced at " + str(count))
             model.update_min_leisure(global_vars.regulatory_threshold_leisure)
-
+            
         random.shuffle(agent_index)
         skill = 0
+
         for i in agent_index[0:5000]:
             if choice == 1:
                 all_agents[i].decrease_reservation_wage_leisure(10)
             else:
                 skill = all_agents[i].skill + skill
                 all_agents[i].decrease_reservation_wage_leisure(11)
-        print("skill:" + str(skill/5000))
+        print("skill:" + str(skill / 5000))
+        demand = print_demand(model)
+        print("Demand: " + str(demand))
         model.step()
 
         ###################################### PRINT PROFIT########################################################
@@ -168,28 +240,24 @@ def self_regulating_worker(model, choice):
         print("Profit: " + str(profit))
         count = count + 1
         ###################################### PRINT DEMAND #######################################################
-        demand = print_demand(model)
-        print("Demand: "+str(demand))
 
         ##################################### CONSUMER SURPLUS ####################################################
         print("Consumer Surplus :" + str(model.consumer_surplus()))
 
         ##################################### MODEL ANALISE #######################################################
         model_features.analise(model)
-
+    '''
     print("wage::::::::::" + str(wage))
-    print("Leisure:::::::"+ str(leisure))
-
-    with open('Models/demand_after15rounds.pkl', 'wb') as output:
-        pickle.dump(model, output, pickle.HIGHEST_PROTOCOL)
+    print("Leisure:::::::" + str(leisure))
 
 
-def self_regulating_employer(demand_model):
+def self_regulating_employer(demand_model, updatefor):
+    print("Printing the employer work")
     unemployment = list()
     initial_demand = list()
     wage_avg = list()
     leisure_avg = list()
-    for i in range(0, 10):
+    for i in updatefor:
         initial_demand.append(demand_model.schedule.agents[i].get_need())
     initial_demand.append(sum(initial_demand))
     print(initial_demand)
@@ -197,21 +265,21 @@ def self_regulating_employer(demand_model):
     all_members = demand_model.schedule.agents
     wage = list()
     leisure = list()
-    for i in range(0, 10):
+    for i in updatefor:
         wage.append(all_members[i].get_wage_offered())
         leisure.append(all_members[i].get_leisure())
-    print("Wage: "+ str(wage))
-    print("Leisure: " +str(leisure))
+    print("Wage: " + str(wage))
+    print("Leisure: " + str(leisure))
 
-    for i in range(0, 10):
+    for i in updatefor:
         model_features.analise(demand_model)
         unemployment.append(global_vars.unemployment_rate)
 
-        for k in range(0, 10):
+        for k in updatefor:
             demand_model.schedule.agents[k].increase_wage_and_leisure()
         demand_model.step()
         profit = list()
-        for pro in range(0, 10):
+        for pro in updatefor:
             profit.append(all_members[pro].calculate_profit())
         profit.append(sum(profit) / 10)
         print("Profit: " + str(profit))
@@ -222,16 +290,16 @@ def self_regulating_employer(demand_model):
         print(".......................................................................")
         wage = list()
         leisurex = list()
-        for avg in range(0, 10):
+        for avg in updatefor:
             wage.append(all_members[avg].get_wage_offered())
             leisurex.append(all_members[avg].get_leisure())
-        wage_avg.append(sum(wage)/10)
-        leisure_avg.append(sum(leisurex)/10)
+        wage_avg.append(sum(wage) / 10)
+        leisure_avg.append(sum(leisurex) / 10)
         print(str(wage_avg))
         print(str(leisure_avg))
     wage = list()
     leisure = list()
-    for i in range(0, 10):
+    for i in updatefor:
         wage.append(all_members[i].get_wage_offered())
         leisure.append(all_members[i].get_leisure())
     print("Wage: " + str(wage))
@@ -240,3 +308,27 @@ def self_regulating_employer(demand_model):
     print("Leisure avg: " + str(leisure_avg))
 
 
+def combined_model(demand_model):
+    mask = [0 for i in range(0, 10)]
+    for i in range(0, 10):
+        initial = print_demand(demand_model)
+        self_regulating_worker(demand_model, 2, 1)
+        final = print_demand(demand_model)
+        mask = model_outside.updateornot(initial, final, mask)
+        updatedfor = list()
+        for j in range(len(mask)):
+            if mask[j] == 3:
+                print("Added to list")
+                updatedfor.append(j)
+                mask[j] = 0
+        print(updatedfor)
+        if len(updatedfor) != 0:
+            self_regulating_employer(demand_model, updatedfor)
+        all_members = demand_model.schedule.agents
+    wage = list()
+    leisure = list()
+    for i in range(0, 10):
+        wage.append(all_members[i].get_wage_offered())
+        leisure.append(all_members[i].get_leisure())
+    print("Wage: " + str(wage))
+    print("Leisure: " + str(leisure))

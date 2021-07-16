@@ -85,12 +85,6 @@ class Employer(Agent):
         if self.leisure < minimum_leisure:
             self.leisure = minimum_leisure
 
-    def set_min_wage_leisure(self, minimum_wage, minimum_leisure):
-        if self.leisure < minimum_leisure:
-            self.leisure = minimum_leisure
-        if self.wage_offered < minimum_wage:
-            self.wage_offered = minimum_wage
-
     def increase_wage_and_leisure(self):
         self.increment_number += 1
         if self.need == 0:
