@@ -196,12 +196,11 @@ def self_regulating_worker(model, choice, iterations):
         with open('Models/demand_after15rounds11.pkl', 'wb') as output:
             pickle.dump(model, output, pickle.HIGHEST_PROTOCOL)
     # increase the demands
-    '''
     for i in range(0, 10):
         all_agents[i].demand = math.ceil(0.1 * all_agents[i].demand) + all_agents[i].demand
         all_agents[i].need = math.ceil(0.1 * all_agents[i].demand) + all_agents[i].need
 
-    while demand[-1] > 0 and count < iterations:
+    while demand[-1] > 0 and count < 15:
         print("\n")
         print("Iteration" + str(count))
         print("--------------------------------")
@@ -246,7 +245,7 @@ def self_regulating_worker(model, choice, iterations):
 
         ##################################### MODEL ANALISE #######################################################
         model_features.analise(model)
-    '''
+
     print("wage::::::::::" + str(wage))
     print("Leisure:::::::" + str(leisure))
 
@@ -277,6 +276,7 @@ def self_regulating_employer(demand_model, updatefor):
 
         for k in updatefor:
             demand_model.schedule.agents[k].increase_wage_and_leisure()
+        model_outside.fire_from_job(demand_model)
         demand_model.step()
         profit = list()
         for pro in updatefor:

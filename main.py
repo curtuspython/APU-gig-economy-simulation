@@ -25,11 +25,11 @@ if __name__ == "__main__":
     demand_model_skill = copy.deepcopy(demand_model)
     demand_model_employer = copy.deepcopy(demand_model)
     print("################################### Model 2 ################################################")
-    call_n_plots.self_regulating_worker(demand_model, 1, 15)
+    #call_n_plots.self_regulating_worker(demand_model, 1, 15)
     print("################################### Model 3 ################################################")
     call_n_plots.self_regulating_worker(demand_model_skill, 2, 15)
     print("################################### Model 4 ################################################")
-    # updatefor = [i for i in range(0,10)]
-    # call_n_plots.self_regulating_employer(demand_model_employer, updatefor)
+    #updatefor = [i for i in range(0,10)]
+    #call_n_plots.self_regulating_employer(demand_model_employer, updatefor)
     print("##################################Model 5################################")
     # call_n_plots.combined_model(demand_model)
