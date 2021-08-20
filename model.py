@@ -72,17 +72,17 @@ class MarketModel(Model):
         #  1-5 online employers
         x = 60
         intercept = intercept - diff1
-        for i in range(int(self.num_employers / 2)):
-            a = Employer(i, self, worker_count, x, 0.5, 1, intercept, self.service_demand[i], self.employer_flex[i])
+        for i in [0, 1, 2, 3, 4, 5, 6]:
+            a = Employer(i, self, worker_count, x, 0.5, 0, intercept, self.service_demand[i], self.employer_flex[i])
             self.schedule.add(a)
-            x = x + 10
+            x = x + 8
         # 6-10 offline employers
         x = 100
         intercept = intercept + diff1
-        for i in range(int(self.num_employers / 2)):
-            a = Employer(int(self.num_employers / 2) + i, self, worker_count, x, 0.5, n, intercept,
-                         self.service_demand[int(self.num_employers / 2) + i],
-                         self.employer_flex[int(self.num_employers / 2) + i])
+        for i in [0,1,2 ]:
+            a = Employer(int(self.num_employers / 2) + 2 + i, self, worker_count, x, 0.5, 1, intercept,
+                         self.service_demand[int(self.num_employers / 2) +2 + i],
+                         self.employer_flex[int(self.num_employers / 2) + 2 + i])
             self.schedule.add(a)
             x = x + 10
 
@@ -116,9 +116,14 @@ class MarketModel(Model):
 
         # This model corresponds to general form
         else:
+            nums = np.ones(5000)
+            nums[:5000] = 0
+            np.random.shuffle(nums)
+            type_counter = 0
             for i in range(int(self.num_workers / 5)):
                 a = Worker(i + employer_count, self, employer_count, 100, 0.5, 200, 1, self.flexibility[i],
-                           self.tolerance[i], self.revenue_potential[i], self.skills[i])
+                           self.tolerance[i], self.revenue_potential[i], self.skills[i], nums[type_counter])
+                type_counter += 1
                 self.schedule.add(a)
 
             for i in range(int(self.num_workers / 5)):
@@ -126,7 +131,8 @@ class MarketModel(Model):
                            self.flexibility[int(self.num_workers / 5) + i],
                            self.tolerance[int(self.num_workers / 5) + i],
                            self.revenue_potential[int(self.num_workers / 5) + i],
-                           self.skills[int(self.num_workers / 5) + i])
+                           self.skills[int(self.num_workers / 5) + i],nums[type_counter])
+                type_counter += 1
                 self.schedule.add(a)
 
             for i in range(int(self.num_workers / 5)):
@@ -134,7 +140,8 @@ class MarketModel(Model):
                            self.flexibility[2 * int(self.num_workers / 5) + i],
                            self.tolerance[2 * int(self.num_workers / 5) + i],
                            self.revenue_potential[2 * int(self.num_workers / 5) + i],
-                           self.skills[2 * int(self.num_workers / 5) + i])
+                           self.skills[2 * int(self.num_workers / 5) + i],nums[type_counter])
+                type_counter += 1
                 self.schedule.add(a)
 
             for i in range(int(self.num_workers / 5)):
@@ -142,7 +149,8 @@ class MarketModel(Model):
                            self.flexibility[3 * int(self.num_workers / 5) + i],
                            self.tolerance[3 * int(self.num_workers / 5) + i],
                            self.revenue_potential[3 * int(self.num_workers / 5) + i],
-                           self.skills[3 * int(self.num_workers / 5) + i])
+                           self.skills[3 * int(self.num_workers / 5) + i],nums[type_counter])
+                type_counter += 1
                 self.schedule.add(a)
 
             for i in range(int(self.num_workers / 5)):
@@ -150,7 +158,8 @@ class MarketModel(Model):
                            self.flexibility[4 * int(self.num_workers / 5) + i],
                            self.tolerance[4 * int(self.num_workers / 5) + i],
                            self.revenue_potential[4 * int(self.num_workers / 5) + i],
-                           self.skills[4 * int(self.num_workers / 5) + i])
+                           self.skills[4 * int(self.num_workers / 5) + i], nums[type_counter])
+                type_counter += 1
                 self.schedule.add(a)
 
     def step(self):

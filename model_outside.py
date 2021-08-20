@@ -66,3 +66,55 @@ def fire_from_job(model):
                     all_agents[i].reset(agents)
                     count = count + 1
     print("Fired form job:" + str(count))
+
+
+def give_incentive(model):
+    all_agents = model.schedule.agents
+    count = 0
+    for agent in all_agents:
+        if isinstance(agent, Worker):
+            if agent.works_under != -1 and agent.type == 1:
+                if agent.skill >= 0.5:
+                    agent.wage_preferred = (1 + 0.1 * agent.skill)*agent.wage_preferred
+                    agent.revenue_potential = (1 + 0.05 * agent.skill) * agent.revenue_potential
+
+
+def profit_find(model):
+    all_agents = model.schedule.agents
+    profit = 0
+    profit_list = list()
+    for agents in model.schedule.agents:
+        if isinstance(agents, Employer):
+            profit = 0
+            for i in agents.get_workers():
+                profit = profit + (all_agents[i].revenue_potential - all_agents[i].wage_preferred)
+            profit_list.append(profit)
+    return profit_list
+
+
+def get_urates(model):
+    gig_count =0
+    ngig_count = 0
+    gig_emp = 0
+    ngig_emp = 0
+    all_agents = model.schedule.agents
+    for agent in all_agents:
+        if isinstance(agent,Worker):
+            if agent.type == 1:
+                gig_count += 1
+                if agent.works_under != -1:
+                    gig_emp +=1
+            else:
+                ngig_count +=1
+                if agent.works_under != -1:
+                    ngig_emp += 1
+
+    print(gig_emp)
+    print(gig_count)
+    print(ngig_emp)
+    print(ngig_count)
+    return [gig_emp, gig_count, ngig_emp, ngig_count]
+
+
+
+

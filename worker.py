@@ -10,10 +10,11 @@ class Worker(Agent):
     """ A worker agent."""
     emp_count = 0
 
-    def __init__(self, unique_id, model, M, n, prob, total, t_o_w, flexibility, tolerance, revenue_potential, skill):
+    def __init__(self, unique_id, model, M, n, prob, total, t_o_w, flexibility, tolerance, revenue_potential, skill, pref_modes):
         super().__init__(unique_id, model)
         self.prob = prob
         self.reduce_wage = False
+        self.pref_modes = pref_modes
         self.n = n
         self.wage_preferred = np.random.binomial(self.n, self.prob, 1)[0]
         self.type = random.randint(1, 2)
@@ -121,7 +122,7 @@ class Worker(Agent):
             for i in employers:
                 obj = self.model.schedule.agents[i]
                 u = self.wage_coef * obj.get_wage_offered() + self.lei_coef * obj.get_leisure()
-                if self.type == obj.get_type():
+                if self.type == obj.get_type() or self.pref_modes == 1:
                     # hiring of worker j by Employer i
                     if self.utility < u and self.wage_preferred <= obj.get_wage_offered() and self.leisure_preferred <= obj.get_leisure() and obj.get_need() > 0:
                         if self.revenue_potential * self.skill > obj.get_wage_offered() * (1 - obj.get_flexibility()):
