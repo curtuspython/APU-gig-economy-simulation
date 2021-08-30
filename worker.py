@@ -122,7 +122,7 @@ class Worker(Agent):
             for i in employers:
                 obj = self.model.schedule.agents[i]
                 u = self.wage_coef * obj.get_wage_offered() + self.lei_coef * obj.get_leisure()
-                if self.type == obj.get_type() or self.pref_modes == 1:
+                if self.type == obj.get_type():
                     # hiring of worker j by Employer i
                     if self.utility < u and self.wage_preferred <= obj.get_wage_offered() and self.leisure_preferred <= obj.get_leisure() and obj.get_need() > 0:
                         if self.revenue_potential * self.skill > obj.get_wage_offered() * (1 - obj.get_flexibility()):

@@ -168,13 +168,13 @@ def self_regulating_worker(model, choice, iterations, modes_count):
         leisure.append(avg_leisure)
         if model.average_wages() < global_vars.regulatory_threshold_wage:
             print("Minimum wage introduced at " + str(count))
-            #model.update_min_wages(global_vars.regulatory_threshold_wage)
-            #model_outside.leave_job(model)
+            model.update_min_wages(global_vars.regulatory_threshold_wage)
+            model_outside.leave_job(model)
             # model_outside.fire_from_job(model)
         if model.average_leisure() < global_vars.regulatory_threshold_leisure:
             print("Minimum leisure introduced at " + str(count))
-            #model.update_min_leisure(global_vars.regulatory_threshold_leisure)
-            #model_outside.leave_job(model)
+            model.update_min_leisure(global_vars.regulatory_threshold_leisure)
+            model_outside.leave_job(model)
             # model_outside.fire_from_job(model)
         random.shuffle(agent_index)
         skill = 0
