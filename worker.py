@@ -1,5 +1,3 @@
-import math
-
 from mesa import Agent
 import numpy as np
 import random
@@ -13,9 +11,14 @@ class Worker(Agent):
     def __init__(self, unique_id, model, M, n, prob, total, t_o_w, flexibility, tolerance, revenue_potential, skill, pref_modes):
         super().__init__(unique_id, model)
         self.prob = prob
+        self.u_temp = 0
         self.reduce_wage = False
         self.pref_modes = pref_modes
         self.n = n
+        self.agreed_wage = 0
+        self.agreed_leisure = 0
+        self.beauty = 0
+        self.duration = 500
         self.wage_preferred = np.random.binomial(self.n, self.prob, 1)[0]
         self.type = random.randint(1, 2)
         self.leisure_preferred = np.random.binomial(total, self.prob, 1)[0] - self.wage_preferred
@@ -115,13 +118,14 @@ class Worker(Agent):
     def step(self):
         if self.works_under == -1:
             emp = self.model.schedule.agents[0]
-
             flag = -1
             employers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             random.shuffle(employers)
             for i in employers:
                 obj = self.model.schedule.agents[i]
                 u = self.wage_coef * obj.get_wage_offered() + self.lei_coef * obj.get_leisure()
+                if self.u_temp < u:
+                    self.u_temp = u
                 if self.type == obj.get_type():
                     # hiring of worker j by Employer i
                     if self.utility < u and self.wage_preferred <= obj.get_wage_offered() and self.leisure_preferred <= obj.get_leisure() and obj.get_need() > 0:
@@ -130,6 +134,8 @@ class Worker(Agent):
                             self.works_under = obj.get_emp_id()
                             emp = obj
                             flag = 1
+                            self.agreed_wage = obj.get_wage_offered()
+                            self.agreed_leisure = obj.get_leisure()
             if flag == 1:
                 emp.acquire_worker(self.unique_id, self.revenue_potential, self.wage_preferred)
                 self.unemployed_duration = 0
@@ -139,6 +145,10 @@ class Worker(Agent):
         if self.unemployed_duration >= 24 and choice == 11:
             self.improve_skill()
             self.unemployed_duration = self.unemployed_duration - 12
+
+        if self.beauty == 1:
+            return
+
         if self.type == 1:
             if self.reduce_wage:
                 x = self.wage_preferred - 0.1 * self.wage_preferred

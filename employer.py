@@ -16,7 +16,7 @@ class Employer(Agent):
         self.n = n
         self.increment_number = 0
         self.total = total
-        self.demand = math.ceil((5000 / 1000) * service_demand)
+        self.demand = service_demand
         self.need = self.demand
         self.type = t + 1
         self.wage_offered = np.random.binomial(self.n, self.prob, 1)[0]

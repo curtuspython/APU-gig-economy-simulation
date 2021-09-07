@@ -67,24 +67,26 @@ class MarketModel(Model):
         diff1 = -20
         diff2 = -30
         if demand:
+            for i in [0,1]:
+                self.service_demand.append(1249)
             for i in range(0, employer_count):
-                self.service_demand.append(random.randint(50, 100))
-        #  1-5 online employers
-        x = 60
+                self.service_demand.append(313)
+        #  1-2 online employers
+        x = 75
         intercept = intercept - diff1
-        for i in [0, 1, 2, 3, 4, 5, 6]:
+        for i in [0, 1]:
             a = Employer(i, self, worker_count, x, 0.5, 0, intercept, self.service_demand[i], self.employer_flex[i])
             self.schedule.add(a)
-            x = x + 8
-        # 6-10 offline employers
-        x = 100
-        intercept = intercept + diff1
-        for i in [0,1,2 ]:
-            a = Employer(int(self.num_employers / 2) + 2 + i, self, worker_count, x, 0.5, 1, intercept,
-                         self.service_demand[int(self.num_employers / 2) +2 + i],
-                         self.employer_flex[int(self.num_employers / 2) + 2 + i])
-            self.schedule.add(a)
             x = x + 10
+        # 3-10 offline employers
+        x = 90
+        intercept = intercept + diff1
+        for i in [2,3,4,5,6,7,8,9 ]:
+            a = Employer(i, self, worker_count, x, 0.6, 1, intercept,
+                         self.service_demand[i],
+                         self.employer_flex[i])
+            self.schedule.add(a)
+            x = x + 5
 
         # Leisure Preferring Model
         if model_type == 'leisure_preferring':
@@ -161,6 +163,18 @@ class MarketModel(Model):
                            self.skills[4 * int(self.num_workers / 5) + i], nums[type_counter])
                 type_counter += 1
                 self.schedule.add(a)
+        offline_beauty = 0
+        online_beauty = 1000
+        all_agent = self.schedule.agents
+        agent_index = [i for i in range(10, 5010)]
+        random.shuffle(agent_index)
+        for i in agent_index:
+            if isinstance(all_agent[i], Worker):
+                if online_beauty >= 1 and all_agent[i].type == 1:
+                    online_beauty -= 1
+                    all_agent[i].beauty = 1
+                    all_agent[i].duration = random.choice([2, 4])
+                    continue
 
     def step(self):
         """Advance the model by one step."""
