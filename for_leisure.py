@@ -1,0 +1,13 @@
+import matplotlib.pyplot as plt
+leisure_without_cheat = [61.5,62.91479910714287, 63.76706327025583, 64.70192019016378, 65.5902200800037, 66.71056505774887, 67.87209402121418, 69.26377373123573, 70.67649880589283, 72.48888977970532, 74.29163798930418]
+leisure_with_cheat = [61.5, 61.021943573667734, 59.35349486049929, 55.4027302725969, 53.245305706521805, 53.19411126005369, 53.030399744572236, 52.963728081321534, 52.783915737298706, 52.78445173267333, 52.68676654632978]
+leisure = [61.5,59.46212686567164, 56.7342923794712, 53.20944736842105, 55.046484955752234, 53.28740655737711, 52.71521102362208, 52.70103148425787, 53.36530609212482, 55.05850090415915, 53.61070279720284]
+iteration = [i for i in range(0, 11)]
+plt.plot(iteration,leisure_without_cheat, label = "Firms do not cheat")
+plt.plot(iteration,leisure_with_cheat, label = "Firms cheat(workers not leaving job )")
+plt.plot(iteration,leisure, label = "Firms cheat(workers leaving job )")
+plt.title("Variation of Average Offered Lesiure")
+plt.xlabel("Iteration")
+plt.ylabel("Average Offered Leisure")
+plt.legend()
+plt.show()

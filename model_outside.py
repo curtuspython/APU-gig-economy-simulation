@@ -48,7 +48,9 @@ def leave_job(model):
     for agents in model.schedule.agents:
         if isinstance(agents, Worker):
             if agents.get_works_under() != -1:
-                if agents.wage_preferred < global_vars.regulatory_threshold_wage or agents.leisure_preferred < global_vars.regulatory_threshold_leisure:
+                # if agents.wage_preferred < global_vars.regulatory_threshold_wage or agents.leisure_preferred <
+                # global_vars.regulatory_threshold_leisure:
+                if agents.more_tolerances <=0:
                     agents.reset(all_agents[agents.get_works_under()])
                     count = count + 1
     print("Workers leaving job:" + str(count))
@@ -67,29 +69,39 @@ def fire_from_job(model):
     print("Fired form job:" + str(count))
 
 
-def give_incentive(agent, typee):
-    if agent.works_under != -1 :
+def give_incentive(agent, typee, model):
+    all_agents = model.schedule.agents
+    if agent.works_under != -1:
+        flag = False
         if agent.skill >= 0.5 and agent.type == 1:
-            agent.agreed_wage = (1 + 0.05 * agent.skill) * agent.agreed_wage
-            agent.agreed_leisure = (1 + 0.1 * agent.skill) * agent.agreed_leisure
+
+            agent.agreed_wage = (1 + 0.06 * agent.skill) * agent.agreed_wage
+            agent.agreed_leisure = (1 + 0.05 * agent.skill) * agent.agreed_leisure
             agent.revenue_potential = (1 + 0.1 * agent.skill) * agent.revenue_potential
             if typee == 1:
-                #agent.agreed_wage = agent.wage_preferred
-                #agent.agreed_leisure = agent.leisure_preferred
+                flag = True
                 agent.u_temp = agent.wage_coef * agent.agreed_wage + agent.lei_coef * agent.agreed_leisure
+            if not flag:
+                    agent.more_tolerances -= 1
+
         return agent.u_temp
-    return 0
+    return agent.u_temp
 
 
-def profit_find(model):
+def profit_find(model, typee):
     all_agents = model.schedule.agents
     profit = 0
+    count1 = 0
+    count2 = 0
     profit_list = list()
     for agents in model.schedule.agents:
-        if isinstance(agents, Employer):
+        if isinstance(agents, Employer) and agents.type == 1:
             profit = 0
             for i in agents.get_workers():
-                profit = profit + (all_agents[i].revenue_potential - all_agents[i].wage_preferred)
+                if typee == 1 :# not cheating
+                    profit = profit + (all_agents[i].revenue_potential - all_agents[i].agreed_wage)
+                if typee == 2: # cheating
+                    profit = profit + (all_agents[i].revenue_potential - all_agents[i].wage_preferred)
             profit_list.append(profit)
     return profit_list
 
@@ -144,42 +156,56 @@ def avg_wage_job(model):
     avg_freelancer = 0
     count_online = 0
     count_offline = 0
-    count_freelancer =0
+    count_freelancer = 0
     for i in all_agents:
-        if isinstance(i,Worker):
+        if isinstance(i, Worker):
             if i.beauty == 1:
                 avg_freelancer = avg_freelancer + i.wage_preferred
-                count_freelancer+=1
+                count_freelancer += 1
             elif i.type == 2:
                 avg_offline = avg_offline + i.wage_preferred
-                count_offline +=1
+                count_offline += 1
             else:
                 avg_online = avg_online + i.wage_preferred
-                count_online +=1
-    return [avg_online/count_online, avg_offline/count_offline, avg_freelancer/count_freelancer]
+                count_online += 1
+    return [avg_online / count_online, avg_offline / count_offline, avg_freelancer / count_freelancer]
 
 
 def revenue_potential(model):
     rev = 0
     count = 0
     for agents in model.schedule.agents:
-        if isinstance(agents, Worker):
-                count += 1
-                rev += agents.revenue_potential
-
-    return rev/count
+        if isinstance(agents, Worker) and agents.type == 1:
+            count += 1
+            rev += agents.revenue_potential
+    return rev / count
 
 
 def leisure_average(model):
     lei = 0
     count = 0
+    lei2 = 0
     for agents in model.schedule.agents:
         if isinstance(agents, Worker):
-            if agents.works_under != -1:
+            if agents.works_under != -1 and agents.type == 1:
                 lei += agents.get_leisure_preferred()
-                # lei += agents.agreed_leisure
-                count +=1
+                lei2 += agents.agreed_leisure
+                count += 1
 
-    return lei/count
+    return [lei / count, lei2 / count]
+
+
+def wage_average(model):
+    lei = 0
+    count = 0
+    lei2 = 0
+    for agents in model.schedule.agents:
+        if isinstance(agents, Worker):
+            if agents.works_under != -1 and agents.type == 1:
+                lei += agents.get_wage_preferred()
+                lei2 += agents.agreed_wage
+                count += 1
+
+    return [lei / count, lei2 / count]
 
 

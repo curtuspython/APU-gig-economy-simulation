@@ -12,6 +12,7 @@ class Worker(Agent):
         super().__init__(unique_id, model)
         self.prob = prob
         self.u_temp = 0
+        self.more_tolerances = 4
         self.reduce_wage = False
         self.pref_modes = pref_modes
         self.n = n
@@ -111,6 +112,7 @@ class Worker(Agent):
     def reset(self, agent):
         self.utility = 0
         self.works_under = -1
+        self.more_tolerances = 0
         index = agent.workers.index(self.unique_id)
         agent.workers.remove(self.unique_id)
         agent.workers_potential.pop(index)
@@ -139,6 +141,7 @@ class Worker(Agent):
             if flag == 1:
                 emp.acquire_worker(self.unique_id, self.revenue_potential, self.wage_preferred)
                 self.unemployed_duration = 0
+                self.more_tolerances =4
 
     def decrease_reservation_wage_leisure(self, choice):
         self.update_unemployed_time()

@@ -121,16 +121,18 @@ def self_regulating_worker(model, choice, iterations, modes_count):
             else:
                 if all_agents[i].beauty == 0:
                     skill = all_agents[i].skill + skill
-                    avgval += model_outside.give_incentive(all_agents[i], 2)
+                    avgval += model_outside.give_incentive(all_agents[i], 2, model)
                     all_agents[i].decrease_reservation_wage_leisure(11)
         skill_list.append(skill / 5000)
         demand = print_demand(model)
         model_outside.job_tenure_end(model)
         model.step()
+        # model_outside.leave_job(model)
         revpot = model_outside.revenue_potential(model)
         avglei = model_outside.leisure_average(model)
-        profit = model_outside.profit_find(model);
-        profit_list.append(sum(profit) / 10)
+        avgwage = model_outside.wage_average(model)
+        profit = model_outside.profit_find(model, 2)
+        profit_list.append(sum(profit) / 2)
         count = count + 1
         model_features.analise(model)
         unemp_rates.append(global_vars.unemployment_rate)
@@ -142,9 +144,10 @@ def self_regulating_worker(model, choice, iterations, modes_count):
         gig_list.append(gig_non_gig[0])
         ngig_list.append(gig_non_gig[2])
         free_list.append(gig_non_gig[4])
-        avgval = avgval / (gig_non_gig[0] + gig_non_gig[2] + gig_non_gig[4])
+        avgval = avgval / 5000
     print("Aveage Revenue Generating potential: " + str(revpot))
     print("Average Leisure for the workers:" + str(avglei))
+    print("Average Wage for the workers:" + str(avgwage))
     print("Average Valuation: " + str(avgval))
     print("Unemployement Rates:" + str(unemp_rates))
     print("Online Employed " + str(gig_list))
@@ -159,7 +162,7 @@ def self_regulating_worker(model, choice, iterations, modes_count):
     print("Offline_WAGE: " + str(offline_wage))
     print("Freelancer_WAGE: " + str(freelancer_wage))
     print("Skill: "+ str(skill_list))
-    return [gig_list,ngig_list,free_list, online_wage,offline_wage,freelancer_wage, revpot, avglei, avgval]
+    return [gig_list, ngig_list, free_list, online_wage, offline_wage, freelancer_wage, revpot, avglei[0], avglei[1], avgval, sum(profit) / 10, unemp_rates]
 
 
 def self_regulating_employer(demand_model, updatefor):
@@ -216,8 +219,11 @@ def combined_model(demand_model):
     e = list()
     f = list()
     g = list()
+    g_prime = list()
     h = list()
     p = list()
+    pro_list = list()
+    dd = list()
     all_agents = demand_model.schedule.agents
     for agent in all_agents:
         if isinstance(agent, Worker):
@@ -225,7 +231,7 @@ def combined_model(demand_model):
             count = count + 1
     for i in range(0, 10):
         initial = print_demand(demand_model)
-        x = self_regulating_worker(demand_model,2,1,5000)
+        x = self_regulating_worker(demand_model, 2, 1, 5000)
         a.append(x[0])
         b.append(x[1])
         c.append(x[2])
@@ -233,8 +239,11 @@ def combined_model(demand_model):
         e.append(x[4])
         f.append(x[5])
         g.append(x[6])
-        h.append(x[7])
-        p.append(x[8])
+        g_prime.append(x[7])
+        h.append(x[8])
+        p.append(x[9])
+        pro_list.append(x[10])
+        dd.append(x[11])
         final = print_demand(demand_model)
         #model_outside.give_incentive(demand_model,1)
         mask = model_outside.updateornot(initial, final, mask)
@@ -268,6 +277,9 @@ def combined_model(demand_model):
     print(d)
     print(e)
     print(f)
-    print(g)
-    print(h)
-    print(p)
+    print("Revenue Potential :" + str(g))
+    print("Actual Leisure: "+ str(g_prime))
+    print("Expected Leisure: "+ str(h))
+    print("Valuation: " +str(p))
+    print("Profit :" + str(pro_list))
+    print("enemployment rates:" + str(dd))

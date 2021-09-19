@@ -14,10 +14,10 @@ import model_outside as mo
 np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
 if __name__ == "__main__":
-    with open('Models/beauty_workers_1.pkl', 'rb') as inputData:
+    with open('Models/beauty_workers_2.pkl', 'rb') as inputData:
         demand_model = pickle.load(inputData)
     demand_model = call_n_plots.model_with_demand_constraint()
-    #with open('Models/beauty_workers_1.pkl', 'wb') as output:
+    #with open('Models/beauty_workers_2.pkl', 'wb') as output:
     #    pickle.dump(demand_model, output, pickle.HIGHEST_PROTOCOL)
     mo.set_regulating_leisure(demand_model)
     mo.set_regulating_wage(demand_model)
