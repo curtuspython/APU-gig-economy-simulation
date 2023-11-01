@@ -8,6 +8,13 @@ class Worker(Agent):
     """ A worker agent."""
     emp_count = 0
 
+
+
+
+
+
+
+    
     def __init__(self, unique_id, model, M, n, prob, total, t_o_w, flexibility, tolerance, revenue_potential, skill, pref_modes):
         super().__init__(unique_id, model)
         self.prob = prob
